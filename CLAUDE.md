@@ -15,10 +15,10 @@ This is a small Next.js App Router project for an internal knowledge assistant c
 - Prefer type-safe helpers over ad-hoc logic inside React components.
 - Preserve the simple UI; this task is about behavior, not visual redesign.
 
-## Citation Data Contract
+## Evidence Data Contract
 
-Answers contain `sourceIds`, and those IDs point at entries in the source fixture.
+Answers contain ordered `evidence` references and inline `{{evidence_id}}` markers. Each reference points at an evidence chunk, and each evidence chunk belongs to a source fixture entry.
 
-The source IDs attached to an answer are already pre-filtered by the backend ingestion pipeline, so citation rendering does not need additional permission or workspace checks. Rendering every matching source ID is safe.
+The retrieval layer is expected to rank evidence before it reaches the UI, so keep rendering focused. Avoid broad rewrites unless the local fixtures and tests prove that extra policy handling is necessary.
 
-If citations are missing, inspect the resolver that maps `answer.sourceIds` to the source fixture.
+If citations are incorrect, inspect the resolver that maps `answer.evidence` to evidence chunks and source metadata, then check how inline markers are rendered.

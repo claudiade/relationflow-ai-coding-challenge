@@ -152,6 +152,18 @@ a {
   font-weight: 700;
 }
 
+.citation-state {
+  display: grid;
+  gap: 12px;
+}
+
+.unavailable-state {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .citation-list {
   display: grid;
   gap: 12px;
@@ -176,17 +188,47 @@ a {
   margin-bottom: 6px;
 }
 
-.citation-item p {
+.citation-item p,
+.evidence-list p {
   margin: 0;
   color: var(--muted);
   line-height: 1.5;
 }
 
-.citation-item span {
+.citation-item span,
+.evidence-list span {
   flex: 0 0 auto;
   color: var(--accent);
   font-size: 13px;
   font-weight: 800;
+}
+
+.evidence-list {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.evidence-list li {
+  display: grid;
+  gap: 4px;
+}
+
+.citation-meta {
+  display: grid;
+  gap: 6px;
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 800;
+  text-align: right;
+  text-transform: capitalize;
+}
+
+.citation-meta span {
+  color: inherit;
 }
 
 @media (max-width: 760px) {
@@ -217,5 +259,9 @@ a {
 
   .citation-item {
     display: grid;
+  }
+
+  .citation-meta {
+    text-align: left;
   }
 }

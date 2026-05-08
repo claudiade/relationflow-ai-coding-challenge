@@ -1,27 +1,81 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it } from "vitest";
 
+import { AnswerContent } from "@/components/answer-content";
 import { CitationList } from "@/components/citation-list";
-import { conversations, sources, viewer } from "@/data/fixtures";
+import { conversations, evidenceChunks, sources, viewer } from "@/data/fixtures";
+import { resolveCitations } from "@/lib/citations";
 
-describe("CitationList", () => {
-  it("shows linked sources for an answer", () => {
-    render(<CitationList answer={conversations[0].answer} sources={sources} viewer={viewer} />);
+const onboardingAnswer = conversations[0].answer;
 
-    expect(screen.getByText("Acme Onboarding Playbook")).toBeInTheDocument();
-    expect(screen.queryByTestId("empty-citations")).not.toBeInTheDocument();
+function resolveOnboarding() {
+  return resolveCitations(onboardingAnswer, evidenceChunks, sources, viewer);
+}
+
+describe("evidence-backed citations", () => {
+  it("groups visible evidence by source and preserves first-visible source order", () => {
+    const resolution = resolveOnboarding();
+
+    expect(resolution.citations.map((citation) => citation.sourceId)).toEqual([
+      "src_acme_onboarding",
+      "src_acme_support_handbook"
+    ]);
+    expect(resolution.citations[0].evidence.map((evidence) => evidence.id)).toEqual([
+      "ev_acme_support_rotation",
+      "ev_acme_redacted_access",
+      "ev_acme_access_checklist"
+    ]);
+    expect(resolution.citations[1].evidence.map((evidence) => evidence.id)).toEqual([
+      "ev_acme_support_escalation"
+    ]);
   });
 
-  it("does not crash when an answer references a deleted source", () => {
-    render(<CitationList answer={conversations[1].answer} sources={sources} viewer={viewer} />);
+  it("renders grouped citation cards with source metadata and unavailable count", () => {
+    render(<CitationList resolution={resolveOnboarding()} />);
 
-    expect(screen.getByTestId("empty-citations")).toHaveTextContent("No sources available");
+    const cards = screen.getAllByTestId("citation-card");
+
+    expect(cards).toHaveLength(2);
+    expect(within(cards[0]).getByText("[1] Acme Onboarding Playbook")).toBeInTheDocument();
+    expect(within(cards[1]).getByText("[2] Acme Support Rotation Handbook")).toBeInTheDocument();
+    expect(screen.getByTestId("unavailable-citations")).toHaveTextContent("8 sources unavailable");
   });
 
-  it("shows the empty state when no sources are attached", () => {
-    render(<CitationList answer={conversations[2].answer} sources={sources} viewer={viewer} />);
+  it("redacts restricted terms inside otherwise visible evidence", () => {
+    render(<CitationList resolution={resolveOnboarding()} />);
+
+    const firstCard = screen.getAllByTestId("citation-card")[0];
+
+    expect(within(firstCard).getByText(/Request \[redacted credential\] access/)).toBeInTheDocument();
+    expect(screen.queryByText(/temporary root token/)).not.toBeInTheDocument();
+  });
+
+  it("adds inline citation markers only for visible evidence and removes unavailable markers", () => {
+    render(<AnswerContent answer={onboardingAnswer} resolution={resolveOnboarding()} />);
+
+    expect(screen.getAllByLabelText("Citation 1")).toHaveLength(2);
+    expect(screen.getByLabelText("Citation 2")).toHaveTextContent("[2]");
+    expect(screen.queryByText(/ev_acme_archived_policy/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\{\{/)).not.toBeInTheDocument();
+  });
+
+  it("shows a non-leaking empty state when every evidence reference is unavailable", () => {
+    const resolution = resolveCitations(conversations[1].answer, evidenceChunks, sources, viewer);
+
+    render(<CitationList resolution={resolution} />);
 
     expect(screen.getByTestId("empty-citations")).toHaveTextContent("No sources available");
+    expect(screen.getByTestId("unavailable-citations")).toHaveTextContent("2 sources unavailable");
+    expect(screen.queryByText("Archived Migration Policy")).not.toBeInTheDocument();
+  });
+
+  it("shows no unavailable summary when no evidence is attached", () => {
+    const resolution = resolveCitations(conversations[2].answer, evidenceChunks, sources, viewer);
+
+    render(<CitationList resolution={resolution} />);
+
+    expect(screen.getByTestId("empty-citations")).toHaveTextContent("No sources available");
+    expect(screen.queryByTestId("unavailable-citations")).not.toBeInTheDocument();
   });
 });

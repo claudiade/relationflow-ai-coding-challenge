@@ -1,5 +1,7 @@
+import { AnswerContent } from "@/components/answer-content";
 import { CitationList } from "@/components/citation-list";
-import { conversations, sources, viewer } from "@/data/fixtures";
+import { conversations, evidenceChunks, sources, viewer } from "@/data/fixtures";
+import { resolveCitations } from "@/lib/citations";
 
 type HomeProps = {
   searchParams?: Promise<{
@@ -14,6 +16,7 @@ export default async function Home({ searchParams }: HomeProps) {
     : params.conversation;
   const activeConversation =
     conversations.find((conversation) => conversation.id === requestedConversation) ?? conversations[0];
+  const citationResolution = resolveCitations(activeConversation.answer, evidenceChunks, sources, viewer);
 
   return (
     <main className="page-shell">
@@ -51,12 +54,12 @@ export default async function Home({ searchParams }: HomeProps) {
 
         <article className="answer-block">
           <p className="eyebrow">Assistant Answer</p>
-          <p>{activeConversation.answer.body}</p>
+          <AnswerContent answer={activeConversation.answer} resolution={citationResolution} />
         </article>
 
         <section className="sources-block" aria-labelledby="sources-title">
           <h3 id="sources-title">Sources</h3>
-          <CitationList answer={activeConversation.answer} sources={sources} viewer={viewer} />
+          <CitationList resolution={citationResolution} />
         </section>
       </section>
     </main>
