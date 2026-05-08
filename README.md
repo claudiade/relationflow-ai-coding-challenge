@@ -20,16 +20,29 @@ Your solution should:
 - Show a count of unavailable sources without leaking their titles, excerpts, owners, or workspace.
 - Add or update tests for the behavior you rely on.
 - Complete `SUBMISSION.md`.
+- Complete `SESSION.md`.
 
 ## Submission
 
 Do not open a pull request against the public challenge repository.
 
-Relationflow will invite you to a private candidate repository for your attempt. Commit your work there, push it, and complete `SUBMISSION.md` with:
+Relationflow will invite you to a private candidate repository for your attempt. Commit your work there, push it, and complete:
+
+`SUBMISSION.md` with:
 
 - What changed.
 - What you tested.
 - The final commit SHA we should evaluate.
+
+`SESSION.md` with:
+
+- Which AI tools you used.
+- The prompts or instructions you gave the AI.
+- The relevant AI outputs, edits, commands, or recommendations you accepted.
+- The parts you changed manually.
+- Any prompts or outputs you intentionally discarded.
+
+Do not include secrets, access tokens, private credentials, or personal data in `SESSION.md`. Redact anything sensitive before submission.
 
 ## Setup
 
