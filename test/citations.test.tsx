@@ -21,6 +21,10 @@ describe("canViewSource", () => {
   it("returns false when the source belongs to a different workspace", () => {
     expect(canViewSource(sources[5], viewer)).toBe(false);
   });
+
+  it("returns false when the source is archived", () => {
+    expect(canViewSource(sources[6], viewer)).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
