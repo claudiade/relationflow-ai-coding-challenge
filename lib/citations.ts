@@ -73,9 +73,14 @@ export function applyRedactions(
   redactions: EvidenceRedaction[] | undefined,
   context: ViewerContext
 ): string {
-  void redactions;
-  void context;
-  return excerpt;
+  if (!redactions) return excerpt;
+
+  return redactions.reduce((text, redaction) => {
+    if (redaction.visibleToGroups.every((group) => context.groups.includes(group))) {
+      return text;
+    }
+    return text.replaceAll(redaction.text, redaction.replacement);
+  }, excerpt);
 }
 
 export function resolveCitations(
