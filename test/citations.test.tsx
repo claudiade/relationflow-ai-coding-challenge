@@ -34,6 +34,10 @@ describe("canViewSource", () => {
     const euSource = { ...sources[0], region: "eu" as const };
     expect(canViewSource(euSource, viewer)).toBe(false);
   });
+
+  it("returns false when the viewer is missing a required group", () => {
+    expect(canViewSource(sources[3], viewer)).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
