@@ -89,21 +89,19 @@ export function resolveCitations(
   allSources: Source[],
   context: ViewerContext
 ): CitationResolution {
-  void context;
-
   const evidenceById = new Map(evidenceChunks.map((evidence) => [evidence.id, evidence]));
   const sourcesById = new Map(allSources.map((source) => [source.id, source]));
   const citationBySourceId = new Map<string, ResolvedCitation>();
   const citations: ResolvedCitation[] = [];
   const evidenceToCitationNumber: Record<string, number> = {};
+  let unavailableCount = 0;
 
-  // BUG: the legacy resolver trusts retrieval output and groups every matching
-  // evidence ID. It misses source policy, time windows, redactions, and unavailable counts.
   for (const reference of answer.evidence) {
     const evidence = evidenceById.get(reference.evidenceId);
     const source = evidence ? sourcesById.get(evidence.sourceId) : undefined;
 
     if (!evidence || !source || !canUseEvidence(evidence, source, context, answer.asOf)) {
+      unavailableCount++;
       continue;
     }
 
@@ -125,12 +123,12 @@ export function resolveCitations(
 
     citation.evidence.push({
       id: evidence.id,
-      excerpt: evidence.excerpt,
+      excerpt: applyRedactions(evidence.excerpt, evidence.redactions, context),
       updatedAt: evidence.updatedAt,
       confidence: reference.confidence
     });
     evidenceToCitationNumber[evidence.id] = citation.citationNumber;
   }
 
-  return { citations, unavailableCount: 0, evidenceToCitationNumber };
+  return { citations, unavailableCount, evidenceToCitationNumber };
 }
