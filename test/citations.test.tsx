@@ -25,6 +25,10 @@ describe("canViewSource", () => {
   it("returns false when the source is archived", () => {
     expect(canViewSource(sources[6], viewer)).toBe(false);
   });
+
+  it("returns false when the source is internal and the viewer is not an internal employee with admin role", () => {
+    expect(canViewSource(sources[2], viewer)).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
