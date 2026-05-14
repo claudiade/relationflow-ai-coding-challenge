@@ -5,13 +5,23 @@ import { describe, expect, it } from "vitest";
 import { AnswerContent } from "@/components/answer-content";
 import { CitationList } from "@/components/citation-list";
 import { conversations, evidenceChunks, sources, viewer } from "@/data/fixtures";
-import { resolveCitations } from "@/lib/citations";
+import { canViewSource, resolveCitations } from "@/lib/citations";
 
 const onboardingAnswer = conversations[0].answer;
 
 function resolveOnboarding() {
   return resolveCitations(onboardingAnswer, evidenceChunks, sources, viewer);
 }
+
+describe("canViewSource", () => {
+  it("returns true when the source is active, in the viewer's workspace, and the viewer has the required groups", () => {
+    expect(canViewSource(sources[0], viewer)).toBe(true);
+  });
+
+  it("returns false when the source belongs to a different workspace", () => {
+    expect(canViewSource(sources[5], viewer)).toBe(false);
+  });
+});
 
 describe("evidence-backed citations", () => {
   it("groups visible evidence by source and preserves first-visible source order", () => {
