@@ -54,6 +54,11 @@ describe("canUseEvidence", () => {
     const expiredEvidence = { ...evidenceChunks[0], validUntil: "2025-12-31" };
     expect(canUseEvidence(expiredEvidence, sources[0], viewer, "2026-05-01")).toBe(false);
   });
+
+  it("returns false when the evidence status is stale", () => {
+    const staleEvidence = { ...evidenceChunks[0], status: "stale" as const };
+    expect(canUseEvidence(staleEvidence, sources[0], viewer, "2026-05-01")).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
