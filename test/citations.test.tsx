@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { AnswerContent } from "@/components/answer-content";
 import { CitationList } from "@/components/citation-list";
 import { conversations, evidenceChunks, sources, viewer } from "@/data/fixtures";
-import { canViewSource, resolveCitations } from "@/lib/citations";
+import { canUseEvidence, canViewSource, resolveCitations } from "@/lib/citations";
 
 const onboardingAnswer = conversations[0].answer;
 
@@ -42,6 +42,12 @@ describe("canViewSource", () => {
   it("returns false when the viewer has only some of the required groups", () => {
     const multiGroupSource = { ...sources[0], requiredGroups: ["hr", "finance"] as const };
     expect(canViewSource(multiGroupSource, viewer)).toBe(false);
+  });
+});
+
+describe("canUseEvidence", () => {
+  it("returns false when validFrom has not yet been reached at the answer date", () => {
+    expect(canUseEvidence(evidenceChunks[8], sources[0], viewer, "2026-05-01")).toBe(false);
   });
 });
 
