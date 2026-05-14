@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { AnswerContent } from "@/components/answer-content";
 import { CitationList } from "@/components/citation-list";
 import { conversations, evidenceChunks, sources, viewer } from "@/data/fixtures";
-import { canUseEvidence, canViewSource, resolveCitations } from "@/lib/citations";
+import { applyRedactions, canUseEvidence, canViewSource, resolveCitations } from "@/lib/citations";
 
 const onboardingAnswer = conversations[0].answer;
 
@@ -58,6 +58,14 @@ describe("canUseEvidence", () => {
   it("returns false when the evidence status is stale", () => {
     const staleEvidence = { ...evidenceChunks[0], status: "stale" as const };
     expect(canUseEvidence(staleEvidence, sources[0], viewer, "2026-05-01")).toBe(false);
+  });
+});
+
+describe("applyRedactions", () => {
+  it("replaces sensitive text in the excerpt when the viewer lacks the required group", () => {
+    const result = applyRedactions(evidenceChunks[9].excerpt, evidenceChunks[9].redactions, viewer);
+    expect(result).toContain("[redacted credential]");
+    expect(result).not.toContain("temporary root token");
   });
 });
 

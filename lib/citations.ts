@@ -1,4 +1,4 @@
-import type { Answer, EvidenceChunk, EvidenceConfidence, Source, ViewerContext } from "@/data/types";
+import type { Answer, EvidenceChunk, EvidenceConfidence, EvidenceRedaction, Source, ViewerContext } from "@/data/types";
 
 export type ResolvedEvidence = {
   id: string;
@@ -49,6 +49,16 @@ export function canUseEvidence(
   }
 
   return canViewSource(source, context);
+}
+
+export function applyRedactions(
+  excerpt: string,
+  redactions: EvidenceRedaction[] | undefined,
+  context: ViewerContext
+): string {
+  void redactions;
+  void context;
+  return excerpt;
 }
 
 export function resolveCitations(
