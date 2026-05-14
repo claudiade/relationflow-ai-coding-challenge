@@ -74,6 +74,11 @@ describe("applyRedactions", () => {
     expect(result).toContain("temporary root token");
     expect(result).not.toContain("[redacted credential]");
   });
+
+  it("returns the excerpt unchanged when there are no redactions", () => {
+    const result = applyRedactions(evidenceChunks[0].excerpt, evidenceChunks[0].redactions, viewer);
+    expect(result).toBe(evidenceChunks[0].excerpt);
+  });
 });
 
 describe("evidence-backed citations", () => {
