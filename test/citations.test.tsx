@@ -5,13 +5,81 @@ import { describe, expect, it } from "vitest";
 import { AnswerContent } from "@/components/answer-content";
 import { CitationList } from "@/components/citation-list";
 import { conversations, evidenceChunks, sources, viewer } from "@/data/fixtures";
-import { resolveCitations } from "@/lib/citations";
+import { applyRedactions, canUseEvidence, canViewSource, resolveCitations } from "@/lib/citations";
 
 const onboardingAnswer = conversations[0].answer;
 
 function resolveOnboarding() {
   return resolveCitations(onboardingAnswer, evidenceChunks, sources, viewer);
 }
+
+describe("canViewSource", () => {
+  it("returns true when the source is active, in the viewer's workspace, and the viewer has the required groups", () => {
+    expect(canViewSource(sources[0], viewer)).toBe(true);
+  });
+
+  it("returns false when the source belongs to a different workspace", () => {
+    expect(canViewSource(sources[5], viewer)).toBe(false);
+  });
+
+  it("returns false when the source is archived", () => {
+    expect(canViewSource(sources[6], viewer)).toBe(false);
+  });
+
+  it("returns false when the source is internal and the viewer is not an internal employee with admin role", () => {
+    expect(canViewSource(sources[2], viewer)).toBe(false);
+  });
+
+  it("returns false when the source region does not match the viewer's region", () => {
+    const euSource = { ...sources[0], region: "eu" as const };
+    expect(canViewSource(euSource, viewer)).toBe(false);
+  });
+
+  it("returns false when the viewer is missing a required group", () => {
+    expect(canViewSource(sources[3], viewer)).toBe(false);
+  });
+
+  it("returns false when the viewer has only some of the required groups", () => {
+    const multiGroupSource = { ...sources[0], requiredGroups: ["hr", "finance"] as const };
+    expect(canViewSource(multiGroupSource, viewer)).toBe(false);
+  });
+});
+
+describe("canUseEvidence", () => {
+  it("returns false when validFrom has not yet been reached at the answer date", () => {
+    expect(canUseEvidence(evidenceChunks[8], sources[0], viewer, "2026-05-01")).toBe(false);
+  });
+
+  it("returns false when validUntil has already passed at the answer date", () => {
+    const expiredEvidence = { ...evidenceChunks[0], validUntil: "2025-12-31" };
+    expect(canUseEvidence(expiredEvidence, sources[0], viewer, "2026-05-01")).toBe(false);
+  });
+
+  it("returns false when the evidence status is stale", () => {
+    const staleEvidence = { ...evidenceChunks[0], status: "stale" as const };
+    expect(canUseEvidence(staleEvidence, sources[0], viewer, "2026-05-01")).toBe(false);
+  });
+});
+
+describe("applyRedactions", () => {
+  it("replaces sensitive text in the excerpt when the viewer lacks the required group", () => {
+    const result = applyRedactions(evidenceChunks[9].excerpt, evidenceChunks[9].redactions, viewer);
+    expect(result).toContain("[redacted credential]");
+    expect(result).not.toContain("temporary root token");
+  });
+
+  it("preserves the original excerpt when the viewer has the required group", () => {
+    const securityViewer = { ...viewer, groups: ["security"] as const };
+    const result = applyRedactions(evidenceChunks[9].excerpt, evidenceChunks[9].redactions, securityViewer);
+    expect(result).toContain("temporary root token");
+    expect(result).not.toContain("[redacted credential]");
+  });
+
+  it("returns the excerpt unchanged when there are no redactions", () => {
+    const result = applyRedactions(evidenceChunks[0].excerpt, evidenceChunks[0].redactions, viewer);
+    expect(result).toBe(evidenceChunks[0].excerpt);
+  });
+});
 
 describe("evidence-backed citations", () => {
   it("groups visible evidence by source and preserves first-visible source order", () => {
