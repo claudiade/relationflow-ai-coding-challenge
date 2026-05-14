@@ -38,6 +38,11 @@ describe("canViewSource", () => {
   it("returns false when the viewer is missing a required group", () => {
     expect(canViewSource(sources[3], viewer)).toBe(false);
   });
+
+  it("returns false when the viewer has only some of the required groups", () => {
+    const multiGroupSource = { ...sources[0], requiredGroups: ["hr", "finance"] as const };
+    expect(canViewSource(multiGroupSource, viewer)).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
