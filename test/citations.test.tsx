@@ -67,6 +67,13 @@ describe("applyRedactions", () => {
     expect(result).toContain("[redacted credential]");
     expect(result).not.toContain("temporary root token");
   });
+
+  it("preserves the original excerpt when the viewer has the required group", () => {
+    const securityViewer = { ...viewer, groups: ["security"] as const };
+    const result = applyRedactions(evidenceChunks[9].excerpt, evidenceChunks[9].redactions, securityViewer);
+    expect(result).toContain("temporary root token");
+    expect(result).not.toContain("[redacted credential]");
+  });
 });
 
 describe("evidence-backed citations", () => {
