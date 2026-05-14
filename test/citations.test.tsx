@@ -49,6 +49,11 @@ describe("canUseEvidence", () => {
   it("returns false when validFrom has not yet been reached at the answer date", () => {
     expect(canUseEvidence(evidenceChunks[8], sources[0], viewer, "2026-05-01")).toBe(false);
   });
+
+  it("returns false when validUntil has already passed at the answer date", () => {
+    const expiredEvidence = { ...evidenceChunks[0], validUntil: "2025-12-31" };
+    expect(canUseEvidence(expiredEvidence, sources[0], viewer, "2026-05-01")).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
