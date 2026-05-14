@@ -29,6 +29,11 @@ describe("canViewSource", () => {
   it("returns false when the source is internal and the viewer is not an internal employee with admin role", () => {
     expect(canViewSource(sources[2], viewer)).toBe(false);
   });
+
+  it("returns false when the source region does not match the viewer's region", () => {
+    const euSource = { ...sources[0], region: "eu" as const };
+    expect(canViewSource(euSource, viewer)).toBe(false);
+  });
 });
 
 describe("evidence-backed citations", () => {
