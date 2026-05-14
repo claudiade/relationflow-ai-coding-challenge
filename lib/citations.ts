@@ -36,6 +36,10 @@ export function canViewSource(source: Source, context: ViewerContext): boolean {
     return false;
   }
 
+  if (!source.requiredGroups.every((group) => context.groups.includes(group))) {
+    return false;
+  }
+
   if (source.visibility === "internal") {
     return context.role === "admin" && context.isInternalEmployee;
   }
