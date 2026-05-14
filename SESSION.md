@@ -48,3 +48,6 @@ The session was conducted interactively in Claude Code. Key instructions given:
 ## Notes
 
 Do not include secrets, access tokens, private credentials, or personal data. Redact anything sensitive before submission.
+
+The PostCSS vulnerability in the dependency tree has no attack surface in this implementation — user input is 
+never rendered or injected into styles. (as per updating dependencies)
