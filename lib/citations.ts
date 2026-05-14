@@ -32,6 +32,10 @@ export function canViewSource(source: Source, context: ViewerContext): boolean {
     return false;
   }
 
+  if (source.region !== "global" && source.region !== context.region) {
+    return false;
+  }
+
   if (source.visibility === "internal") {
     return context.role === "admin" && context.isInternalEmployee;
   }
