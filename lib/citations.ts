@@ -50,9 +50,18 @@ export function canViewSource(source: Source, context: ViewerContext): boolean {
 export function canUseEvidence(
   evidence: EvidenceChunk,
   source: Source,
-  context: ViewerContext
+  context: ViewerContext,
+  asOf: string
 ): boolean {
   if (evidence.status !== "verified") {
+    return false;
+  }
+
+  if (evidence.validFrom > asOf) {
+    return false;
+  }
+
+  if (evidence.validUntil !== undefined && evidence.validUntil < asOf) {
     return false;
   }
 
@@ -89,7 +98,7 @@ export function resolveCitations(
     const evidence = evidenceById.get(reference.evidenceId);
     const source = evidence ? sourcesById.get(evidence.sourceId) : undefined;
 
-    if (!evidence || !source) {
+    if (!evidence || !source || !canUseEvidence(evidence, source, context, answer.asOf)) {
       continue;
     }
 
